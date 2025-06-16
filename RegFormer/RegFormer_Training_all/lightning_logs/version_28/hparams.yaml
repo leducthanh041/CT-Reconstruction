@@ -1,0 +1,12 @@
+block_num: 10
+options:
+  binshift: 0
+  d2r: 4.906
+  dAng: 0.098144
+  dDet: 0.025716
+  dImg: 0.013282
+  dets: 512
+  height: 256
+  s2r: 5.95
+  views: 32
+  width: 256
