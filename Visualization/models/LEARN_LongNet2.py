@@ -55,6 +55,7 @@ class DilatedAttentionWithAttn(DilatedAttention):
         
         # Lưu ma trận attention weights để sử dụng hoặc trực quan hóa
         self.attn_weights = attn_weights  # Giữ lại trên GPU
+        print(f'attn_weights {self.attn_weights.shape}')
         
         # Tính toán output attention (sử dụng ma trận weights với giá trị v)
         attn_output = torch.matmul(attn_weights, v)  # (B, heads, N, L, d_k)

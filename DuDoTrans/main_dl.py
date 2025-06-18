@@ -40,7 +40,7 @@ class Trainer(object):
 
     # Data Flow Pipiline
     print('Reading CT slices Beginning')
-    self.train_dataset=CTSlice_Provider('/home/thanhld/CT_Reconstruction/split_dl/', setting= self.setting, poission_level=self.poission_level, gaussian_level=self.gaussian_level, num_view=self.num_view, transform=transform)
+    self.train_dataset=CTSlice_Provider('/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/', setting= self.setting, poission_level=self.poission_level, gaussian_level=self.gaussian_level, num_view=self.num_view, transform=transform)
     self.train_loader=DataLoader(dataset=self.train_dataset, batch_size=self.batch_size, shuffle=True)
 
     self.reconstructor_func=reconstructor(self.train_dataset)
@@ -185,7 +185,7 @@ class Trainer(object):
   def inference(self):
     # Data Flow Pipiline
     print('Reading CT slices Beginning')
-    self.test_dataset=CTSlice_Provider('/home/thanhld/CT_Reconstruction/split_dl/', setting= self.setting, poission_level=self.poission_level, gaussian_level=self.gaussian_level, num_view=self.num_view, transform=transform)
+    self.test_dataset=CTSlice_Provider('/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/', setting= self.setting, poission_level=self.poission_level, gaussian_level=self.gaussian_level, num_view=self.num_view, transform=transform)
     self.test_loader=DataLoader(dataset=self.test_dataset, batch_size=1, shuffle=False)
 
     state=torch.load('./results_dl/models'+ '_' + ST +'/epoch_48iter1999.pth.tar')

@@ -4,7 +4,7 @@ from modules.reconstructor import reconstructor, reconstructor_loss
 import torch
 import torch.nn as nn
 # from CTSlice_Provider import CTSlice_Provider
-from CTSlice_Provider import CTSlice_Provider
+from CTSlice_Provider_dl import CTSlice_Provider
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from torch.nn import Module
@@ -46,25 +46,24 @@ def to_batch_tensor(x, device):
 # --- 6. Chuẩn bị device, dataset, model ---
 num_view = 64
 input_size = 256
-poission_level=1e6
-folder = "AAPM"
+poission_level=0
+folder = "DeepLesion"
 folder_V="LongNet"
 
 print(f'num_view {num_view} and poission_level {poission_level}')
-device= torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device= torch.device("cuda:7" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
 
 print("Using device:", device)
 
-path_dir = "/home/doanhbc/q3_ThayKhang/CT-reconstruction/split/"
+path_dir = "/data/uittogether/Thanhld/split_dl/"
 transform = transforms.Compose([transforms.Resize(input_size)])
 
 dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inputsize_256_noise_0_transform",
                            poission_level=poission_level, num_view=num_view, input_size=input_size,
                            transform=transform, test=True, num_select=-1)
 
-model_longnet = LEARN_LongNet_pl.load_from_checkpoint("/home/uit2023/LuuTru/Thanhld/CT_Reconstruction2/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=45-val_psnr=43.4135.ckpt",
-                                                    map_location=device)
+model_longnet = LEARN_LongNet_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=46-val_psnr=43.7895.ckpt")
 model_longnet.to(device).eval()
                            
 # Khởi tạo các biến để lưu ảnh tốt nhất
@@ -76,7 +75,7 @@ ssim_metric = StructuralSimilarityIndexMeasure().to(device)
 psnr_metric = PeakSignalNoiseRatio().to(device)
 
 # Duyệt qua tất cả các ảnh trong dataset để tìm ảnh có PSNR và SSIM cao nhất
-for i in range(len(dataset)):
+for i in range(1):
     phantom_raw, fbp_u_raw, sino_raw = dataset[i]
     phantom = to_batch_tensor(phantom_raw, device)
     fbp_u_longnet = to_batch_tensor(fbp_u_raw, device)
@@ -134,9 +133,21 @@ def merge_attention_matrices_list(attn_maps_list):
 
         # Bước 1: flatten chiều segment và token trong segment
         attn_flat = attn_weights.view(B, H, S * N, N)
-        
+        # print(f'attn_flat: {attn_flat.shape}')
+        # Bước 2: Tính M1 bằng phép nhân attn_flat^T @ attn_flat -> (B, H, N, N)
+        #    Đây chính là ma trận 1024×1024 giữ thông tin tương tác nội bộ
         attn_T = attn_flat.transpose(-1, -2)              # (B, H, N, S*N)
-              
+        # print(f'attn_T: {attn_T.shape}')
+        # M1     = torch.matmul(attn_T, attn_flat)         # (B, H, N, N)
+        # # print(f'M1: {M1.shape}')
+
+        # # Bước 3: Lấy M2 từ attn_flat, ví dụ lấy transpose trên 2 chiều cuối
+        # M2 = attn_flat.transpose(-1, -2)
+
+        # # Bước 4: nhân ma trận 3 chiều
+        # temp = torch.matmul(attn_flat, M1)
+        # attn_final = torch.matmul(temp, M2)
+        
         merged_list.append(attn_T)
     return merged_list
 
@@ -252,4 +263,5 @@ fig.colorbar(im, cax=cbar_ax)
 plt.tight_layout(rect=[0, 0, left - 0.005, 1])  # tránh trùng với colorbar
 plt.show()
 plt.savefig(f"./Visualization/{folder_V}/{folder}/{num_view}_view_{poission_level}_noise_{folder}.png", dpi=300)
+plt.savefig(f"{num_view}_view_{poission_level}_noise_{folder}.png", dpi=300)
 plt.close()

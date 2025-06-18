@@ -3,6 +3,7 @@ from models.LEARN import LEARN_pl
 from models.LEARN_LongNet2 import LEARN_LongNet_pl
 from models.LEARN_Longformer import LEARN_Longformer_pl
 from models.LEARN_Nys import LEARN_Nys_pl
+from models.LEARN_Mamba import LEARN_Mamba_pl
 from models.RegFormer import RegFormer_pl
 from modules.reconstructor import reconstructor, reconstructor_loss
 import torch
@@ -30,7 +31,7 @@ def add_psnr_ssim_text(ax, psnr, ssim):
         0.96, 0.96,
         f'PSNR/SSIM: {psnr:.2f}/{ssim:.2f}',
         color='white',
-        fontsize=8,
+        fontsize=16,
         ha='right',
         va='top',
         transform=ax.transAxes,
@@ -58,16 +59,16 @@ def add_inset_zoom(ax, arr, box, zoom_ratio=0.3):
 #endregion
 
 # === Main code ===
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:4' if torch.cuda.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 num_view = 32
 input_size = 256
-path_dir = "/data/uittogether/Thanhld/split_dl/"
+path_dir = "/data/uittogether/LuuTru/Thanhld/split_dl/"
 transform = transforms.Compose([transforms.Resize(input_size)])
-data = 'AAPM'####################################################################################
+folder = 'DeepLesion'####################################################################################
 
-titles = ['Ground truth', 'FBP', 'LEARN', 'LEARN \n Longformer self-attention', 'LEARN \n LongNet self-attention', 'LEARN \n NystromFormer self-attention', 'RegFormer', 'DuDoTrans']
+titles = ['Ground truth', 'FBP', 'LEARN \n NystromFormer self-attention', 'LEARN \n Longformer self-attention', 'LEARN \n LongNet self-attention', 'LEARN \n Selective State Spaces', 'LEARN' , 'RegFormer', 'DuDoTrans']
 
 ssim_metric = StructuralSimilarityIndexMeasure().to(device)
 psnr_metric = PeakSignalNoiseRatio().to(device)
@@ -78,27 +79,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=35-val_psnr=41.7198.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=35-val_psnr=41.7198.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=38.3784.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=38.3784.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=46-val_psnr=36.2320.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=46-val_psnr=36.2320.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform_2_9M/epoch=45-val_psnr=40.4359.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform_2_9M/epoch=45-val_psnr=40.4359.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
+model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=08-val_psnr=26.6002.ckpt",
+    map_location=device)
+model_mamba.eval().to(device)
+
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=40.1836.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=40.1836.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -108,12 +114,12 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
 
-max_loops = 10
+max_loops = 3
 found = False
 
 min_combined_diff = float('inf')
@@ -126,7 +132,8 @@ cache_metrics = {}
 
 for loop_idx in range(max_loops):
     print(f"Vòng lặp thứ {loop_idx + 1} / {max_loops}")
-    for idx in range(len(dataset)):
+    for idx in range(len(dataset) - 150 , -1, -1):
+    # for idx in range(1):
         phantom_raw, fbp_raw, sino_raw = dataset[idx]
 
         phantom = to_batch_tensor(phantom_raw, device)
@@ -136,14 +143,12 @@ for loop_idx in range(max_loops):
         with torch.no_grad():
             out_nys = model_nys(fbp, sino)
             out_reg = model_reg(fbp, sino)
-            out_learn = model_learn(fbp, sino)  # Thêm model LEARN vào
+            
 
         psnr_nys = psnr_metric(out_nys, phantom).item()
         ssim_nys = ssim_metric(out_nys, phantom).item()
         psnr_reg = psnr_metric(out_reg, phantom).item()
         ssim_reg = ssim_metric(out_reg, phantom).item()
-        psnr_learn = psnr_metric(out_learn, phantom).item()  # Thêm PSNR LEARN
-        ssim_learn = ssim_metric(out_learn, phantom).item()  # Thêm SSIM LEARN
 
         # Lưu vào cache
         cache_metrics[idx] = {
@@ -151,30 +156,27 @@ for loop_idx in range(max_loops):
             'ssim_nys': ssim_nys,
             'psnr_reg': psnr_reg,
             'ssim_reg': ssim_reg,
-            'psnr_learn': psnr_learn,
-            'ssim_learn': ssim_learn,
             'phantom': phantom,
             'fbp': fbp,
             'sino': sino,
             'out_nys': out_nys,
             'out_reg': out_reg,
-            'out_learn': out_learn,
             'phantom_raw': phantom_raw,
             'fbp_raw': fbp_raw,
             'sino_raw': sino_raw
         }
 
         # Kiểm tra nếu Nystrom > RegFormer và LEARN cả PSNR và SSIM
-        if psnr_nys > psnr_reg and psnr_nys > psnr_learn and ssim_nys > ssim_reg and ssim_nys > ssim_learn:
+        if psnr_nys > psnr_reg  and ssim_nys > ssim_reg :
             print(f"Tìm thấy ảnh idx={idx} thỏa điều kiện tại vòng {loop_idx+1}:")
-            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}, PSNR LEARN: {psnr_learn:.4f}")
-            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}, SSIM LEARN: {ssim_learn:.4f}")
+            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}")
+            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}")
             found = True
             break
 
         # Cập nhật hiệu nhỏ nhất
-        diff_psnr = abs(psnr_nys - psnr_learn)
-        diff_ssim = abs(ssim_nys - ssim_learn)
+        diff_psnr = abs(psnr_nys - psnr_reg)
+        diff_ssim = abs(ssim_nys - ssim_reg)
         combined_diff = diff_psnr + diff_ssim
 
         if combined_diff < min_combined_diff:
@@ -202,7 +204,7 @@ fbp = cache_metrics[idx_final]['fbp']
 sino = cache_metrics[idx_final]['sino']
 out_nys = cache_metrics[idx_final]['out_nys']
 out_reg = cache_metrics[idx_final]['out_reg']
-out_learn = cache_metrics[idx_final]['out_learn']
+
 
 phantom_cpu = to_batch_tensor(cache_metrics[idx_final]['phantom_raw'], 'cpu')
 fbp_cpu = to_batch_tensor(cache_metrics[idx_final]['fbp_raw'], 'cpu')
@@ -211,8 +213,9 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 # Tính các model khác nếu cần
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
+    y_hat_mamba = model_mamba(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
-    y_hat_long = model_long(fbp, sino)
+    y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
 
 ssim_p_learn = ssim_metric(y_hat_learn, phantom).item()
@@ -227,6 +230,9 @@ psnr_p_nys = cache_metrics[idx_final]['psnr_nys']
 ssim_p_long = ssim_metric(y_hat_long, phantom).item()
 psnr_p_long = psnr_metric(y_hat_long, phantom).item()
 
+ssim_p_mamba = ssim_metric(y_hat_mamba, phantom).item()
+psnr_p_mamba = psnr_metric(y_hat_mamba, phantom).item()
+
 ssim_p_reg = cache_metrics[idx_final]['ssim_reg']
 psnr_p_reg = cache_metrics[idx_final]['psnr_reg']
 
@@ -234,13 +240,13 @@ ssim_p_ddt = ssim_metric(y_hat_ddt, phantom).item()
 psnr_p_ddt = psnr_metric(y_hat_ddt, phantom).item()
 
 imgs_0 = [
-    phantom, fbp, y_hat_learn, y_hat_long, y_hat_longnet, out_nys, out_reg, y_hat_ddt
+    phantom, fbp, out_nys, y_hat_long, y_hat_longnet, y_hat_mamba, y_hat_learn, out_reg, y_hat_ddt
 ]
 psnr_list_0 = [
-    None, None, psnr_p_learn, psnr_p_long, psnr_p_longnet, psnr_p_nys, psnr_p_reg, psnr_p_ddt
+    None, None, psnr_p_nys, psnr_p_long, psnr_p_longnet, psnr_p_mamba, psnr_p_learn, psnr_p_reg, psnr_p_ddt
 ]
 ssim_list_0 = [
-    None, None, ssim_p_learn, ssim_p_long, ssim_p_longnet, ssim_p_nys, ssim_p_reg, ssim_p_ddt
+    None, None, ssim_p_nys, ssim_p_long, ssim_p_longnet, ssim_p_mamba, ssim_p_learn, ssim_p_reg, ssim_p_ddt
 ]
 
 print(f"Kết quả cuối cùng của noise {poission_level} tại idx = {idx_final}: PSNR_nys={psnr_p_nys:.4f}, SSIM_nys={ssim_p_nys:.4f}")
@@ -253,28 +259,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_500000.0_transform/epoch=07-val_psnr=35.3654.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_500000.0_transform/epoch=07-val_psnr=35.3654.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=46-val_psnr=37.8223.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=46-val_psnr=37.8223.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=33-val_psnr=35.2276.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=33-val_psnr=35.2276.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform_2_9M/epoch=45-val_psnr=39.1148.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform_2_9M/epoch=45-val_psnr=39.1148.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
+model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=08-val_psnr=26.3399.ckpt",
+    map_location=device)
+model_mamba.eval().to(device)
 
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=39.2371.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=39.2371.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -284,12 +294,12 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
 
-max_loops = 10
+max_loops = 3
 found = False
 
 min_combined_diff = float('inf')
@@ -302,7 +312,8 @@ cache_metrics = {}
 
 for loop_idx in range(max_loops):
     print(f"Vòng lặp thứ {loop_idx + 1} / {max_loops}")
-    for idx in range(len(dataset)):
+    for idx in range(len(dataset) - 200 , -1, -1):
+    # for idx in range(1):
         phantom_raw, fbp_raw, sino_raw = dataset[idx]
 
         phantom = to_batch_tensor(phantom_raw, device)
@@ -312,14 +323,12 @@ for loop_idx in range(max_loops):
         with torch.no_grad():
             out_nys = model_nys(fbp, sino)
             out_reg = model_reg(fbp, sino)
-            out_learn = model_learn(fbp, sino)  # Thêm model LEARN vào
+            
 
         psnr_nys = psnr_metric(out_nys, phantom).item()
         ssim_nys = ssim_metric(out_nys, phantom).item()
         psnr_reg = psnr_metric(out_reg, phantom).item()
         ssim_reg = ssim_metric(out_reg, phantom).item()
-        psnr_learn = psnr_metric(out_learn, phantom).item()  # Thêm PSNR LEARN
-        ssim_learn = ssim_metric(out_learn, phantom).item()  # Thêm SSIM LEARN
 
         # Lưu vào cache
         cache_metrics[idx] = {
@@ -327,30 +336,27 @@ for loop_idx in range(max_loops):
             'ssim_nys': ssim_nys,
             'psnr_reg': psnr_reg,
             'ssim_reg': ssim_reg,
-            'psnr_learn': psnr_learn,
-            'ssim_learn': ssim_learn,
             'phantom': phantom,
             'fbp': fbp,
             'sino': sino,
             'out_nys': out_nys,
             'out_reg': out_reg,
-            'out_learn': out_learn,
             'phantom_raw': phantom_raw,
             'fbp_raw': fbp_raw,
             'sino_raw': sino_raw
         }
 
         # Kiểm tra nếu Nystrom > RegFormer và LEARN cả PSNR và SSIM
-        if psnr_nys > psnr_reg and psnr_nys > psnr_learn and ssim_nys > ssim_reg and ssim_nys > ssim_learn:
+        if psnr_nys > psnr_reg  and ssim_nys > ssim_reg :
             print(f"Tìm thấy ảnh idx={idx} thỏa điều kiện tại vòng {loop_idx+1}:")
-            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}, PSNR LEARN: {psnr_learn:.4f}")
-            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}, SSIM LEARN: {ssim_learn:.4f}")
+            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}")
+            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}")
             found = True
             break
 
         # Cập nhật hiệu nhỏ nhất
-        diff_psnr = abs(psnr_nys - psnr_learn)
-        diff_ssim = abs(ssim_nys - ssim_learn)
+        diff_psnr = abs(psnr_nys - psnr_reg)
+        diff_ssim = abs(ssim_nys - ssim_reg)
         combined_diff = diff_psnr + diff_ssim
 
         if combined_diff < min_combined_diff:
@@ -378,7 +384,7 @@ fbp = cache_metrics[idx_final]['fbp']
 sino = cache_metrics[idx_final]['sino']
 out_nys = cache_metrics[idx_final]['out_nys']
 out_reg = cache_metrics[idx_final]['out_reg']
-out_learn = cache_metrics[idx_final]['out_learn']
+
 
 phantom_cpu = to_batch_tensor(cache_metrics[idx_final]['phantom_raw'], 'cpu')
 fbp_cpu = to_batch_tensor(cache_metrics[idx_final]['fbp_raw'], 'cpu')
@@ -387,8 +393,9 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 # Tính các model khác nếu cần
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
+    y_hat_mamba = model_mamba(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
-    y_hat_long = model_long(fbp, sino)
+    y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
 
 ssim_p_learn = ssim_metric(y_hat_learn, phantom).item()
@@ -403,6 +410,9 @@ psnr_p_nys = cache_metrics[idx_final]['psnr_nys']
 ssim_p_long = ssim_metric(y_hat_long, phantom).item()
 psnr_p_long = psnr_metric(y_hat_long, phantom).item()
 
+ssim_p_mamba = ssim_metric(y_hat_mamba, phantom).item()
+psnr_p_mamba = psnr_metric(y_hat_mamba, phantom).item()
+
 ssim_p_reg = cache_metrics[idx_final]['ssim_reg']
 psnr_p_reg = cache_metrics[idx_final]['psnr_reg']
 
@@ -410,13 +420,13 @@ ssim_p_ddt = ssim_metric(y_hat_ddt, phantom).item()
 psnr_p_ddt = psnr_metric(y_hat_ddt, phantom).item()
 
 imgs_5e5 = [
-    phantom, fbp, y_hat_learn, y_hat_long, y_hat_longnet, out_nys, out_reg, y_hat_ddt
+    phantom, fbp, out_nys, y_hat_long, y_hat_longnet, y_hat_mamba, y_hat_learn, out_reg, y_hat_ddt
 ]
 psnr_list_5e5 = [
-    None, None, psnr_p_learn, psnr_p_long, psnr_p_longnet, psnr_p_nys, psnr_p_reg, psnr_p_ddt
+    None, None, psnr_p_nys, psnr_p_long, psnr_p_longnet, psnr_p_mamba, psnr_p_learn, psnr_p_reg, psnr_p_ddt
 ]
 ssim_list_5e5 = [
-    None, None, ssim_p_learn, ssim_p_long, ssim_p_longnet, ssim_p_nys, ssim_p_reg, ssim_p_ddt
+    None, None, ssim_p_nys, ssim_p_long, ssim_p_longnet, ssim_p_mamba, ssim_p_learn, ssim_p_reg, ssim_p_ddt
 ]
 
 print(f"Kết quả cuối cùng của noise {poission_level} tại idx = {idx_final}: PSNR_nys={psnr_p_nys:.4f}, SSIM_nys={ssim_p_nys:.4f}")
@@ -429,28 +439,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.2374.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.2374.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=46-val_psnr=38.4334.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=46-val_psnr=38.4334.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=31-val_psnr=35.8869.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=31-val_psnr=35.8869.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform_2_9M/epoch=45-val_psnr=39.6366.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform_2_9M/epoch=45-val_psnr=39.6366.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
+model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=08-val_psnr=26.4543.ckpt",
+    map_location=device)
+model_mamba.eval().to(device)
 
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=39.5972.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2_dl/results_RegFormer_10_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=39.5972.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -460,12 +474,12 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results_dl/models_{num_view}_view_{poission_level}_noise/epoch_48iter1999.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
 
-max_loops = 10
+max_loops = 3
 found = False
 
 min_combined_diff = float('inf')
@@ -478,8 +492,9 @@ cache_metrics = {}
 
 for loop_idx in range(max_loops):
     print(f"Vòng lặp thứ {loop_idx + 1} / {max_loops}")
-    for idx in range(len(dataset)):
-        phantom_raw, fbp_raw, sino_raw = dataset[1]
+    for idx in range(len(dataset) - 170 , -1, -1):
+    # for idx in range(1):
+        phantom_raw, fbp_raw, sino_raw = dataset[idx]
 
         phantom = to_batch_tensor(phantom_raw, device)
         fbp = to_batch_tensor(fbp_raw, device)
@@ -488,14 +503,12 @@ for loop_idx in range(max_loops):
         with torch.no_grad():
             out_nys = model_nys(fbp, sino)
             out_reg = model_reg(fbp, sino)
-            out_learn = model_learn(fbp, sino)  # Thêm model LEARN vào
+            
 
         psnr_nys = psnr_metric(out_nys, phantom).item()
         ssim_nys = ssim_metric(out_nys, phantom).item()
         psnr_reg = psnr_metric(out_reg, phantom).item()
         ssim_reg = ssim_metric(out_reg, phantom).item()
-        psnr_learn = psnr_metric(out_learn, phantom).item()  # Thêm PSNR LEARN
-        ssim_learn = ssim_metric(out_learn, phantom).item()  # Thêm SSIM LEARN
 
         # Lưu vào cache
         cache_metrics[idx] = {
@@ -503,30 +516,27 @@ for loop_idx in range(max_loops):
             'ssim_nys': ssim_nys,
             'psnr_reg': psnr_reg,
             'ssim_reg': ssim_reg,
-            'psnr_learn': psnr_learn,
-            'ssim_learn': ssim_learn,
             'phantom': phantom,
             'fbp': fbp,
             'sino': sino,
             'out_nys': out_nys,
             'out_reg': out_reg,
-            'out_learn': out_learn,
             'phantom_raw': phantom_raw,
             'fbp_raw': fbp_raw,
             'sino_raw': sino_raw
         }
 
         # Kiểm tra nếu Nystrom > RegFormer và LEARN cả PSNR và SSIM
-        if psnr_nys > psnr_reg and psnr_nys > psnr_learn and ssim_nys > ssim_reg and ssim_nys > ssim_learn:
+        if psnr_nys > psnr_reg  and ssim_nys > ssim_reg :
             print(f"Tìm thấy ảnh idx={idx} thỏa điều kiện tại vòng {loop_idx+1}:")
-            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}, PSNR LEARN: {psnr_learn:.4f}")
-            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}, SSIM LEARN: {ssim_learn:.4f}")
+            print(f"PSNR Nystrom: {psnr_nys:.4f} > PSNR Reg: {psnr_reg:.4f}")
+            print(f"SSIM Nystrom: {ssim_nys:.4f} > SSIM Reg: {ssim_reg:.4f}")
             found = True
             break
 
         # Cập nhật hiệu nhỏ nhất
-        diff_psnr = abs(psnr_nys - psnr_learn)
-        diff_ssim = abs(ssim_nys - ssim_learn)
+        diff_psnr = abs(psnr_nys - psnr_reg)
+        diff_ssim = abs(ssim_nys - ssim_reg)
         combined_diff = diff_psnr + diff_ssim
 
         if combined_diff < min_combined_diff:
@@ -554,7 +564,7 @@ fbp = cache_metrics[idx_final]['fbp']
 sino = cache_metrics[idx_final]['sino']
 out_nys = cache_metrics[idx_final]['out_nys']
 out_reg = cache_metrics[idx_final]['out_reg']
-out_learn = cache_metrics[idx_final]['out_learn']
+
 
 phantom_cpu = to_batch_tensor(cache_metrics[idx_final]['phantom_raw'], 'cpu')
 fbp_cpu = to_batch_tensor(cache_metrics[idx_final]['fbp_raw'], 'cpu')
@@ -563,8 +573,9 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 # Tính các model khác nếu cần
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
+    y_hat_mamba = model_mamba(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
-    y_hat_long = model_long(fbp, sino)
+    y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
 
 ssim_p_learn = ssim_metric(y_hat_learn, phantom).item()
@@ -579,6 +590,9 @@ psnr_p_nys = cache_metrics[idx_final]['psnr_nys']
 ssim_p_long = ssim_metric(y_hat_long, phantom).item()
 psnr_p_long = psnr_metric(y_hat_long, phantom).item()
 
+ssim_p_mamba = ssim_metric(y_hat_mamba, phantom).item()
+psnr_p_mamba = psnr_metric(y_hat_mamba, phantom).item()
+
 ssim_p_reg = cache_metrics[idx_final]['ssim_reg']
 psnr_p_reg = cache_metrics[idx_final]['psnr_reg']
 
@@ -586,13 +600,13 @@ ssim_p_ddt = ssim_metric(y_hat_ddt, phantom).item()
 psnr_p_ddt = psnr_metric(y_hat_ddt, phantom).item()
 
 imgs_1e6 = [
-    phantom, fbp, y_hat_learn, y_hat_long, y_hat_longnet, out_nys, out_reg, y_hat_ddt
+    phantom, fbp, out_nys, y_hat_long, y_hat_longnet, y_hat_mamba, y_hat_learn, out_reg, y_hat_ddt
 ]
 psnr_list_1e6 = [
-    None, None, psnr_p_learn, psnr_p_long, psnr_p_longnet, psnr_p_nys, psnr_p_reg, psnr_p_ddt
+    None, None, psnr_p_nys, psnr_p_long, psnr_p_longnet, psnr_p_mamba, psnr_p_learn, psnr_p_reg, psnr_p_ddt
 ]
 ssim_list_1e6 = [
-    None, None, ssim_p_learn, ssim_p_long, ssim_p_longnet, ssim_p_nys, ssim_p_reg, ssim_p_ddt
+    None, None, ssim_p_nys, ssim_p_long, ssim_p_longnet, ssim_p_mamba, ssim_p_learn, ssim_p_reg, ssim_p_ddt
 ]
 
 print(f"Kết quả cuối cùng của noise {poission_level} tại idx = {idx_final}: PSNR_nys={psnr_p_nys:.4f}, SSIM_nys={ssim_p_nys:.4f}")
@@ -627,8 +641,13 @@ yellow_boxes1 = [(140, 150, 40, 40)]  # Thay đổi vị trí cho hàng 1
 yellow_boxes2 = [(90, 120, 40, 40)]  # Thay đổi vị trí cho hàng 2
 yellow_boxes3 = [(190, 130, 40, 40)]  # Thay đổi vị trí cho hàng 3
 
-fig, axes = plt.subplots(3, 8, figsize=(28, 12))
-plt.subplots_adjust(hspace=0.02, wspace=0.05)
+# fig, axes = plt.subplots(3, 9, figsize=(30, 10))
+# plt.subplots_adjust(hspace=0.05, wspace=0.001)  # Giảm thêm khoảng cách giữa các cột
+
+fig, axes = plt.subplots(3, 9, figsize=(29.3, 10))  # Thêm số cột và tăng chiều ngang của figure
+plt.subplots_adjust(hspace=0.05, wspace=0.01)  # Giảm khoảng cách giữa các cột
+
+
 
 for row_idx, data in enumerate(datasets):
     imgs = data['imgs']
@@ -644,7 +663,7 @@ for row_idx, data in enumerate(datasets):
     else:
         yellow_boxes = yellow_boxes3
 
-    for col_idx in range(8):
+    for col_idx in range(9):
         ax = axes[row_idx, col_idx]
         arr = imgs[col_idx].detach().cpu().squeeze().numpy()  # luôn chuyển về CPU trước khi vẽ
         ax.imshow(arr, cmap='gray')
@@ -662,17 +681,16 @@ for row_idx, data in enumerate(datasets):
         add_inset_zoom(ax, arr, yellow_boxes[0])
 
     # Thêm nhãn dọc cho mỗi hàng
-    label_ys = [0.75, 0.50, 0.25]
+    label_ys = [0.8, 0.50, 0.15]
     fig.text(
-        0.115,  # vị trí ngang (gần sát trái)
+        -0.005,  # vị trí ngang (gần sát trái)
         label_ys[row_idx],  # vị trí dọc chính giữa hàng
         data['label'],
         va='center',
         ha='center',
         rotation='vertical',
-        fontsize=16
+        fontsize=22
     )
-
-# plt.savefig(f"./Visualization/{folder}/f'views_{num_view}_{folder}.png", bbox_inches='tight')
-plt.savefig(f'views_{num_view}_dl.png', bbox_inches='tight')
+plt.tight_layout()
+plt.savefig(f'./Visualization/{folder}/views_{num_view}_dl.png', bbox_inches='tight')
 #endregion

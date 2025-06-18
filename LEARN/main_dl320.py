@@ -22,7 +22,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/home/uit2023/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -50,7 +50,7 @@ num_detectors = 512
 poission_level = 0
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/home/thanhld/CT_Reconstruction/split_dl/"
+path_dir = "/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/"
 
 n_iterations = 30
 batch_size = 1
@@ -61,7 +61,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=13-val_psnr=38.6088.ckpt"
+checkpoint_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=13-val_psnr=38.60.ckpt"
 
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if os.path.exists(checkpoint_path):

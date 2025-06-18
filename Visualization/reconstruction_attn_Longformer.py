@@ -51,19 +51,19 @@ folder = "DeepLesion"
 folder_V="Long"
 
 print(f'num_view {num_view} and poission_level {poission_level}')
-device= torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device= torch.device("cuda:6" if torch.cuda.is_available() else "cpu")
 # device = torch.device("cpu")
 
 print("Using device:", device)
 
-path_dir = "/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/"
+path_dir = "/data/uittogether/Thanhld/split_dl/"
 transform = transforms.Compose([transforms.Resize(input_size)])
 
 dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inputsize_256_noise_0_transform",
                            poission_level=poission_level, num_view=num_view, input_size=input_size,
                            transform=transform, test=True, num_select=-1)
 
-model = LEARN_Longformer_pl.load_from_checkpoint("/home/uit2023/LuuTru/Thanhld/CT_Reconstruction2/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=47-val_psnr=40.0641.ckpt",
+model = LEARN_Longformer_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=47-val_psnr=40.0641.ckpt",
                                                 map_location=device)
 model.to(device).eval()
                            
@@ -76,7 +76,7 @@ ssim_metric = StructuralSimilarityIndexMeasure().to(device)
 psnr_metric = PeakSignalNoiseRatio().to(device)
 
 # Duyệt qua tất cả các ảnh trong dataset để tìm ảnh có PSNR và SSIM cao nhất
-for i in range(len(dataset)):
+for i in range(1):
     phantom_raw, fbp_u_raw, sino_raw = dataset[i]
     phantom = to_batch_tensor(phantom_raw, device)
     fbp_u = to_batch_tensor(fbp_u_raw, device)
@@ -95,7 +95,7 @@ for i in range(len(dataset)):
         best_psnr = psnr_value
         best_ssim = ssim_value
         best_image_index = i  # Cập nhật chỉ số ảnh tốt nhất
-    print(f'idx = {i}, Best PSNR: {best_psnr:.2f}, Best SSIM: {best_ssim:.4f}')
+    print(f'idx = {i}')
 
 # In ra chỉ số ảnh tốt nhất và giá trị PSNR/SSIM của nó
 print(f"Best image index: {best_image_index}")
@@ -131,6 +131,19 @@ def merge_attention_matrices_list(attn_maps_list):
     merged_list = []
     for attn_weights in attn_maps_list:
         attn_weights = attn_weights.permute(0, 2, 3, 1)
+        print(f'attn_weights: {attn_weights.shape}')
+        # attn_flat = attn_weights
+        # # print(f'attn_flat: {attn_flat.shape}')
+        # attn_T = attn_flat.transpose(-1, -2)              
+        # # print(f'attn_T: {attn_T.shape}')
+        # M1     = attn_T @ attn_flat       # (B, H, N, N)
+        # # print(f'M1: {M1.shape}')
+
+        # M2 = attn_flat.transpose(-1, -2)
+
+        # # Bước 4: nhân ma trận 3 chiều
+        # attn_final = attn_flat @ M1 @ M2
+        # print(f'attn_final: {attn_final.shape}')
         merged_list.append(attn_weights)
     return merged_list
 
@@ -175,11 +188,11 @@ def plot_attention_overlay(ax, image, attention_heatmap, alpha=1):
 # Dòng 1: iter 1 đến 7
 for i in range(7):
     attn = attn_maps[i][0].cpu().numpy()       # ma trận attention shape (N, N)
-    # print(f"Shape attn: {attn.shape}")
+    print(f"Shape attn: {attn.shape}")
     attn_mean = attn.mean(axis=0)  # trung bình qua batch và heads -> (N, N)
-    # print(f"Shape attn_mean: {attn_mean.shape}")
+    print(f"Shape attn_mean: {attn_mean.shape}")
     first_row = attn_mean[0, :] 
-    # print(f"Shape first_row: {first_row.shape}")
+    print(f"Shape first_row: {first_row.shape}")
     heatmap = first_row.reshape(side, side)
 
     # Ảnh tái tạo iteration i (lấy từ output model hoặc bạn cần lưu từng bước khi chạy)

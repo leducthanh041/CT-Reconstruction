@@ -3,8 +3,8 @@ from models.LEARN_Nys2 import LEARN_Nys_pl
 from modules.reconstructor import reconstructor, reconstructor_loss
 import torch
 import torch.nn as nn
-from CTSlice_Provider import CTSlice_Provider
-# from CTSlice_Provider_dl import CTSlice_Provider
+# from CTSlice_Provider import CTSlice_Provider
+from CTSlice_Provider_dl import CTSlice_Provider
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from torch.nn import Module
@@ -47,7 +47,7 @@ def to_batch_tensor(x, device):
 num_view = 64
 input_size = 256
 poission_level=0
-folder = "AAPM"
+folder = "DeepLesion"
 folder_V="Nystrom"
 
 print(f'num_view {num_view} and poission_level {poission_level}')
@@ -56,14 +56,14 @@ device= torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
 
 print("Using device:", device)
 
-path_dir = "/data/uittogether/Thanhld/split/"
+path_dir = "/data/uittogether/Thanhld/split_dl/"
 transform = transforms.Compose([transforms.Resize(input_size)])
 
 dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inputsize_256_noise_0_transform",
                            poission_level=poission_level, num_view=num_view, input_size=input_size,
                            transform=transform, test=True, num_select=-1)
 
-model = LEARN_Nys_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=45-val_psnr=46.7756.ckpt",
+model = LEARN_Nys_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_64_noise_0_transform_2_9M/epoch=05-val_psnr=45.8111.ckpt",
                                         map_location = device)
 model.to(device).eval()
                            

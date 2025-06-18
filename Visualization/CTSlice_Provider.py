@@ -44,8 +44,8 @@ class CTSlice_Provider(Dataset):
           paths_training.append(pattern)
                 
       self.slices_path = [item for sublist in paths_training for item in sublist]
-      self.sino_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/train/" + setting + "/sino"
-      self.fbp_u_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/train/" + setting + "/fbp_u"
+      self.sino_path = "/data/uittogether/Thanhld/AAPM_dataset/train/" + setting + "/sino"
+      self.fbp_u_path = "/data/uittogether/Thanhld/AAPM_dataset/train/" + setting + "/fbp_u"
   
     elif test:
       for patient_id in patients_test:
@@ -53,8 +53,8 @@ class CTSlice_Provider(Dataset):
         paths_test.append(pattern)
   
       self.slices_path = [item for sublist in paths_test for item in sublist]
-      self.sino_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/test/" + setting + "/sino"
-      self.fbp_u_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/test/" + setting + "/fbp_u"
+      self.sino_path = "/data/uittogether/Thanhld/AAPM_dataset/test/" + setting + "/sino"
+      self.fbp_u_path = "/data/uittogether/Thanhld/AAPM_dataset/test/" + setting + "/fbp_u"
 
     else:
         for patient_id in patients_training:
@@ -63,8 +63,8 @@ class CTSlice_Provider(Dataset):
           paths_training.append(pattern)
                 
         self.slices_path = [item for sublist in paths_training for item in sublist]
-        self.sino_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/train/" + setting + "/sino"
-        self.fbp_u_path = "/home/uit2023/LuuTru/Thanhld/AAPM_dataset/train/" + setting + "/fbp_u"
+        self.sino_path = "/data/uittogether/Thanhld/AAPM_dataset/train/" + setting + "/sino"
+        self.fbp_u_path = "/data/uittogether/Thanhld/AAPM_dataset/train/" + setting + "/fbp_u"
 
     self.radon_full, self.iradon_full, self.fbp_full, self.op_norm_full=self._radon_transform(num_view=360)
     self.radon_curr, self.iradon_curr, self.fbp_curr, self.op_norm_curr=self._radon_transform(num_view=num_view)
