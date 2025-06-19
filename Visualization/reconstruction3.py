@@ -3,6 +3,7 @@ from models.LEARN import LEARN_pl
 from models.LEARN_LongNet2 import LEARN_LongNet_pl
 from models.LEARN_Longformer import LEARN_Longformer_pl
 from models.LEARN_Nys import LEARN_Nys_pl
+from models.LEARN_Mamba import LEARN_Mamba_pl
 from models.RegFormer import RegFormer_pl
 from modules.reconstructor import reconstructor, reconstructor_loss
 import torch
@@ -63,7 +64,7 @@ print(f"Using device: {device}")
 
 num_view = 32
 input_size = 256
-path_dir = "/data/uittogether/Thanhld/split/"
+path_dir = "/data/uittogether/LuuTru/Thanhld/split/"
 transform = transforms.Compose([transforms.Resize(input_size)])
 folder = 'AAPM'####################################################################################
 
@@ -78,32 +79,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=42.0794.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=42.0794.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=39.4321.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=39.4321.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=37.6893.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=37.6893.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=41.7931.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=41.7931.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
 model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
-    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=08-val_psnr=26.6002.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=04-val_psnr=29.4999.ckpt",
     map_location=device)
 model_mamba.eval().to(device)
 
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=41.6416.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_0_transform/epoch=45-val_psnr=41.6416.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -113,12 +114,12 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
 
-max_loops = 5
+max_loops = 1
 found = False
 
 min_combined_diff = float('inf')
@@ -131,8 +132,8 @@ cache_metrics = {}
 
 for loop_idx in range(max_loops):
     print(f"Vòng lặp thứ {loop_idx + 1} / {max_loops}")
-    for idx in range(len(dataset)):
-        phantom_raw, fbp_raw, sino_raw = dataset[idx]
+    for idx in range(1):
+        phantom_raw, fbp_raw, sino_raw = dataset[27]
 
         phantom = to_batch_tensor(phantom_raw, device)
         fbp = to_batch_tensor(fbp_raw, device)
@@ -212,6 +213,7 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
     y_hat_mamba = model_mamba(fbp, sino)
+    y_hat_reg = model_reg(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
     y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
@@ -258,32 +260,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_500000.0_transform/epoch=21-val_psnr=39.3180.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_500000.0_transform/epoch=21-val_psnr=39.3180.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=38.9221.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=38.9221.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=37.5181.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=37.5181.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=40.1208.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=45-val_psnr=40.1208.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
 model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
-    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=08-val_psnr=26.3399.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2/results_LEARN_14_iters_bs_1_view_32_noise_500000.0_transform/epoch=05-val_psnr=29.1033.ckpt",
     map_location=device)
 model_mamba.eval().to(device)
 
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_500000.0_transform/epoch=35-val_psnr=40.3087.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_500000.0_transform/epoch=35-val_psnr=40.3087.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -293,7 +295,7 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
@@ -392,6 +394,7 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
     y_hat_mamba = model_mamba(fbp, sino)
+    y_hat_reg = model_reg(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
     y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
@@ -437,32 +440,32 @@ dataset = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_inpu
                            transform=transform, test=True, num_select=-1)
 
 model_learn = LEARN_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_1000000.0_transform/epoch=43-val_psnr=40.7239.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_30_iters_bs_1_view_32_noise_1000000.0_transform/epoch=43-val_psnr=40.7239.ckpt",
     map_location=device)
 model_learn.eval().to(device)
 
 model_longnet = LEARN_LongNet_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=39.2880.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=39.2880.ckpt",
     map_location=device)
 model_longnet.eval().to(device)
 
 model_long = LEARN_Longformer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=46-val_psnr=37.2614.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=46-val_psnr=37.2614.ckpt",
     map_location=device)
 model_long.eval().to(device)
 
 model_nys = LEARN_Nys_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.8695.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.8695.ckpt",
     map_location=device)
 model_nys.eval().to(device)
 
 model_mamba = LEARN_Mamba_pl.load_from_checkpoint(
-    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=08-val_psnr=26.4543.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=15-val_psnr=29.0444.ckpt",
     map_location=device)
 model_mamba.eval().to(device)
 
 model_reg = RegFormer_pl.load_from_checkpoint(
-    "/data/uittogether/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.7540.ckpt",
+    "/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/RegFormer/saved_results_noise_2/results_RegFormer_10_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.7540.ckpt",
     map_location=device)
 model_reg.eval().to(device)
 
@@ -472,7 +475,7 @@ dataset_ddt = CTSlice_Provider(base_path=path_dir, setting=f"numview_{num_view}_
 model_ddt = reconstructor(dataset_ddt)
 model_ddt.eval().to(device)
 
-ckpt_path = f"/data/uittogether/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
+ckpt_path = f"/data/uittogether/LuuTru/Thanhld/CT-Reconstruction/DuDoTrans/results/models_{num_view}_view_{poission_level}_noise/epoch_48iter1919.pth.tar"
 checkpoint = torch.load(ckpt_path, map_location=device)
 model_ddt.load_state_dict(checkpoint['reconstructor_state'])
 print("Loaded DuDoTrans model from checkpoint.")
@@ -571,6 +574,7 @@ sino_cpu = to_batch_tensor(cache_metrics[idx_final]['sino_raw'], 'cpu')
 with torch.no_grad():
     y_hat_learn = model_learn(fbp, sino)
     y_hat_mamba = model_mamba(fbp, sino)
+    y_hat_reg = model_reg(fbp, sino)
     y_hat_longnet, _ = model_longnet(fbp, sino)
     y_hat_long, _ = model_long(fbp, sino)
     _, _, _, y_hat_ddt = model_ddt(fbp, phantom, sino)
@@ -678,15 +682,15 @@ for row_idx, data in enumerate(datasets):
         add_inset_zoom(ax, arr, yellow_boxes[0])
 
     # Thêm nhãn dọc cho mỗi hàng
-    label_ys = [0.8, 0.50, 0.13]
+    label_ys = [0.8, 0.50, 0.15]
     fig.text(
-        -0.015,  # vị trí ngang (gần sát trái)
+        -0.005,  # vị trí ngang (gần sát trái)
         label_ys[row_idx],  # vị trí dọc chính giữa hàng
         data['label'],
         va='center',
         ha='center',
         rotation='vertical',
-        fontsize=16
+        fontsize=22
     )
 plt.tight_layout()
 plt.savefig(f'./Visualization/{folder}/views_{num_view}.png', bbox_inches='tight')
