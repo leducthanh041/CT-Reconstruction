@@ -3,20 +3,20 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 # Dữ liệu
-iterations_extended = [12, 14, 16, 18, 20, 22, 24]
-nystrom_psnr_extended = [0.9692, 0.9711,	0.9718,	0.9723,	0.9718,	0.9676,	0.9722]
+iterations_extended = [12, 14, 16, 18, 20]
+nystrom_psnr_extended = [40.1634,	40.2132,	40.4193,	40.6327,	40.4704]
 
 # Giá trị RegFormer chỉ có ở iterations=10
 regformer_iteration = 10
-regformer_psnr = 0.9680
+regformer_psnr = 40.2604
 
-plt.figure(figsize=(7, 4))
+plt.figure(figsize=(6, 4))
 
 # Vẽ đường Nystromformer
 plt.plot(iterations_extended, nystrom_psnr_extended, label='Nystromformer', marker='o', linestyle='-', color='red')
 
 # Vẽ đường ngang RegFormer
-plt.plot([9, 25], [regformer_psnr, regformer_psnr], 
+plt.plot([9, 21], [regformer_psnr, regformer_psnr], 
          linestyle='--', color='green', label='RegFormer')
 
 # Vẽ điểm RegFormer tại iterations=10
@@ -29,8 +29,8 @@ custom_lines = [
 ]
 
 plt.xlabel('Iterations')
-plt.ylabel('SSIM')
+plt.ylabel('PSNR (dB)')
 plt.legend(handles=custom_lines)
 plt.grid(True)
-plt.savefig('Ablation_Study_ssim.png')
+plt.savefig('Ablation_Study_psnr.png')
 plt.show()
