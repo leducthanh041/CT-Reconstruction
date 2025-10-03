@@ -18,7 +18,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/thanhld/CT_Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/home/uit2023/LuuTru/Thanhld/CT-Reconstruction/LEARN_Mamba/saved_results_noise_2_dl_with_Longformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -46,7 +46,7 @@ num_detectors = 512
 poission_level = 5e5
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/home/thanhld/CT_Reconstruction/split_dl/"
+path_dir = "/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/"
 
 n_iterations = 14
 batch_size = 1
@@ -84,7 +84,7 @@ print(f'Total number of parameters: {total_params}')
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
     devices=[0],                 # Sử dụng 1 GPU
-    max_epochs=34,
+    max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)
