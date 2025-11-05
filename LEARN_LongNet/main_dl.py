@@ -18,7 +18,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/uit2023/LuuTru/Thanhld/Sparse-view-CT-reconstruction/LEARN_LongNet/saved_results_noise_2_dl_new/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/home/uit2023/LuuTru/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl_new/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
