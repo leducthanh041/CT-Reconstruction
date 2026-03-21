@@ -19,7 +19,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/thanhld/CT_Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -47,7 +47,7 @@ num_detectors = 512
 poission_level = 5e5
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/home/thanhld/CT_Reconstruction/split/"
+path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 
 n_iterations = 14
 batch_size = 1
@@ -58,7 +58,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/home/thanhld/CT_Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_64_noise_500000.0_transform/epoch=33-val_psnr=43.2038.ckpt"
+checkpoint_path = "/home/thanhld/CT_Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_64_noise_500000.0_transform/epoch=33-val_psnr=43.28.ckpt"
 
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if os.path.exists(checkpoint_path):
@@ -80,7 +80,7 @@ dm = CTDataModule(data_dir=path_dir,
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
     devices=[6],                 # Sử dụng 1 GPU
-    max_epochs=16,
+    max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)

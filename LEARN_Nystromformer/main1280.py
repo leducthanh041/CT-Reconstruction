@@ -19,7 +19,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -41,7 +41,7 @@ def load_callbacks(n_iter, n_view, noise):
     return Mycallbacks
 
 torch.manual_seed(42)
-num_view = 64
+num_view = 128
 input_size = 256
 num_detectors = 512
 poission_level = 0
@@ -57,17 +57,17 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
-# # Đường dẫn tới checkpoint
-# checkpoint_path = "/data/uittogether/LuuTru/Thanhld/Sparse-view-CT-reconstruction-main/CT_Reconstruction_LEARN_paper/saved_results_noise_2_with_LongformerAttention/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=32-val_psnr=38.2781.ckpt"
+# Đường dẫn tới checkpoint
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=22-val_psnr=40.6937.ckpt"
+resume = False
+# Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
+if resume and os.path.exists(checkpoint_path):
+    print(f"Loading model from checkpoint: {checkpoint_path}")
+    model = LEARN_pl.load_from_checkpoint(checkpoint_path)  # Tải mô hình từ checkpoint
+else:
+    model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
 
-# # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
-# if os.path.exists(checkpoint_path):
-#     print(f"Loading model from checkpoint: {checkpoint_path}")
-#     model = LEARN_pl.load_from_checkpoint(checkpoint_path)  # Tải mô hình từ checkpoint
-# else:
-#     model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
-
-model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
+# model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
 
 dm = CTDataModule(data_dir=path_dir, 
                     batch_size=batch_size, 
@@ -79,7 +79,7 @@ dm = CTDataModule(data_dir=path_dir,
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[2],                 # Sử dụng 1 GPU
+    devices=[1],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,

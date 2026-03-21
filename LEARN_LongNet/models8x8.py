@@ -83,7 +83,7 @@ class RegularizationBlock(nn.Module):
         NEW
         '''
         # Lớp LongNet attention block được áp dụng sau Conv1
-        self.longnet_attn = LongNetAttentionBlock(window_size=2, patch_channels=48, image_size=256)
+        self.longnet_attn = LongNetAttentionBlock(window_size=8, patch_channels=48, image_size=256)
         '''
         NEW
         '''

@@ -4,7 +4,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
 from CTSlice_Provider import CTSlice_Provider
-from models2_9M import LEARN_pl
+from models133M import LEARN_pl
 from datamodule import CTDataModule
 import torch.nn as nn
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_16_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -41,7 +41,7 @@ def load_callbacks(n_iter, n_view, noise):
     return Mycallbacks
 
 torch.manual_seed(42)
-num_view = 64
+num_view = 32
 input_size = 256
 num_detectors = 512
 poission_level = 0
@@ -79,7 +79,7 @@ dm = CTDataModule(data_dir=path_dir,
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[2],                 # Sử dụng 1 GPU
+    devices=[4],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,

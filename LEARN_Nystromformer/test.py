@@ -1,5 +1,6 @@
 import pytorch_lightning as pl
-from models2_9M import LEARN_pl
+from models133M import LEARN_pl
+# from models2_9M import LEARN_pl
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 import torch
 from CTSlice_Provider import CTSlice_Provider
@@ -20,13 +21,13 @@ from torchmetrics.image import PeakSignalNoiseRatio
 #hyperparams = lightning_checkpoint["hyper_parameters"]
 #print(hyperparams)
 
-num_view = 32
+num_view = 64
 input_size = 256
 poission_level = 1e6
 
 # path_dir ="AAPM-Mayo-CT-Challenge/"
 '''NEW'''
-path_dir = "/home/thanhld/CT_Reconstruction/split/"
+path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 '''NEW'''
 
 batch_size = 16
@@ -35,7 +36,7 @@ transform = transforms.Compose([transforms.Resize(input_size)])
 n_iterations = 10
 
 #tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
-model = LEARN_pl.load_from_checkpoint("/home/thanhld/CT_Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=45-val_psnr=40.8695.ckpt")
+model = LEARN_pl.load_from_checkpoint("/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_16_with_Nystromformer/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=45-val_psnr=44.3581.ckpt")
 
 '''NEW'''
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
@@ -44,7 +45,7 @@ dm = CTDataModule(data_dir=path_dir, batch_size=batch_size, num_view=num_view, i
                     setting=setting, poission_level=poission_level)
 dm.setup('test')
 
-trainer = pl.Trainer(accelerator='gpu',devices=[7],max_epochs=10,enable_checkpointing=True)
+trainer = pl.Trainer(accelerator='gpu',devices=[1],max_epochs=10,enable_checkpointing=True)
 trainer.test(model, dataloaders=dm)
 #test_model(model, test_loader)
 
