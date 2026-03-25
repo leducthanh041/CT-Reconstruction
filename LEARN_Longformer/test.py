@@ -26,17 +26,12 @@ from torchmetrics.image import PeakSignalNoiseRatio
 #print(hyperparams)
 
 num_view = 64
-'''NEW'''
-# num_view = 32
-'''NEW'''
 input_size = 256
-# poission_level = 5e5
-poission_level = 1e6
-# poission_level = 0
+poission_level = 0
 
 # path_dir ="AAPM-Mayo-CT-Challenge/"
 '''NEW'''
-path_dir = "/home/thanhld/CT_Reconstruction/split/"
+path_dir = "/data/uittogether/Thanhld/split/"
 '''NEW'''
 
 batch_size = 16
@@ -45,21 +40,15 @@ transform = transforms.Compose([transforms.Resize(input_size)])
 n_iterations = 10
 
 #tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
-model = LEARN_pl.load_from_checkpoint("/home/uit2023/LuuTru/Thanhld/Sparse-view-CT-reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=45-val_psnr=43.4135.ckpt")
+model = LEARN_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=49-val_psnr=42.5714.ckpt")
 
-'''NEW'''
-# setting = "numview_32_inputsize_256_noise_0_transform"
-'''NEW'''
-
-# '''NEW'''
-setting = "numview_64_inputsize_256_noise_0_transform"
-# '''NEW'''
+setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
 
 dm = CTDataModule(data_dir=path_dir, batch_size=batch_size, num_view=num_view, input_size=input_size,
                     setting=setting, poission_level=poission_level)
 dm.setup('test')
 
-trainer = pl.Trainer(accelerator='gpu',devices=[1],max_epochs=10,enable_checkpointing=True)
+trainer = pl.Trainer(accelerator='gpu',devices=[0],max_epochs=10,enable_checkpointing=True)
 trainer.test(model, dataloaders=dm)
 #test_model(model, test_loader)
 

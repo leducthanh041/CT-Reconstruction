@@ -1,8 +1,9 @@
 import pytorch_lightning as pl
-from models_global import LEARN_pl
+from models import LEARN_pl
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from datamodule_dl import CTDataModule
 import torch.nn as nn
+from models import GradientFunction
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
@@ -20,11 +21,11 @@ from torchmetrics.image import PeakSignalNoiseRatio
 
 num_view = 32
 input_size = 256
-poission_level = 0
+poission_level = 1e6
 
 # path_dir ="AAPM-Mayo-CT-Challenge/"
 '''NEW'''
-path_dir = "/home/doanhbc/q3_ThayKhang/CT-reconstruction/split_dl/"
+path_dir = "/data/uittogether/Thanhld/split_dl/"
 '''NEW'''
 
 batch_size = 16
@@ -33,7 +34,8 @@ transform = transforms.Compose([transforms.Resize(input_size)])
 n_iterations = 10
 
 #tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
-model = LEARN_pl.load_from_checkpoint("/home/uit2023/LuuTru/Thanhld/CT_Reconstruction2/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=46-val_psnr=36.2320.ckpt")
+model = LEARN_pl.load_from_checkpoint("/data/uittogether/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl_with_Longformer/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=31-val_psnr=35.8869.ckpt",
+                                    map_location='cuda')
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
 
@@ -42,7 +44,7 @@ dm = CTDataModule(data_dir=path_dir, batch_size=batch_size, num_view=num_view, i
                     setting=setting, poission_level=poission_level)
 dm.setup('test')
 
-trainer = pl.Trainer(accelerator='gpu',devices=[1],max_epochs=10,enable_checkpointing=True)
+trainer = pl.Trainer(accelerator='gpu',devices=[4],max_epochs=10,enable_checkpointing=True)
 trainer.test(model, dataloaders=dm)
 #test_model(model, test_loader)
 

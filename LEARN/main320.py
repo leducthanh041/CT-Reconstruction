@@ -1,26 +1,20 @@
 import pytorch_lightning as pl
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
-from CTSlice_Provider import CTSlice_Provider
 from models import LEARN_pl
 from datamodule import CTDataModule
 import torch.nn as nn
-from models import GradientFunction
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-import torch.multiprocessing as mp
 import os
 
-import numpy as np
 from pytorch_lightning import seed_everything
 
 def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -42,12 +36,12 @@ def load_callbacks(n_iter, n_view, noise):
     return Mycallbacks
 
 torch.manual_seed(42)
-num_view = 32
+num_view = 128
 input_size = 256
 num_detectors = 512
 poission_level = 0
-setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/home/thanhld/CT_Reconstruction/split/"
+setting = "numview_"+str(num_view)+"_inputsize_256_noise_0"
+path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 
 n_iterations = 30
 batch_size = 1
@@ -70,7 +64,7 @@ dm = CTDataModule(data_dir=path_dir,
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[0],                 # Sử dụng 1 GPU
+    devices=[5],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,

@@ -3,13 +3,9 @@ from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
-from CTSlice_Provider import CTSlice_Provider
-#from models.learn import LEARN_pl
-from models import LEARN_pl
-from datamodule_dl import CTDataModule
+from models4x4 import LEARN_pl
+from datamodule import CTDataModule
 import torch.nn as nn
-#from models.learn import GradientFunction
-from models import GradientFunction
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
@@ -22,7 +18,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_4_with_Longformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -44,15 +40,15 @@ def load_callbacks(n_iter, n_view, noise):
     return Mycallbacks
 
 torch.manual_seed(42)
-num_view = 64
+num_view = 32
 input_size = 256
 num_detectors = 512
 poission_level = 0
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/home/thanhld/CT_Reconstruction/split_dl/"
+path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 
-n_iterations = 30
+n_iterations = 14
 batch_size = 1
 
 n_iter, n_view, noise = n_iterations, num_view, str(poission_level)
@@ -61,10 +57,11 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/home/thanhld/CT_Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_64_noise_0_transform/epoch=31-val_psnr=46.4256.ckpt"
+checkpoint_path = "/datastore/uittogether3/LuuTru/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=00-val_psnr=32.9969.ckpt"
+resume = False
 
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
-if os.path.exists(checkpoint_path):
+if resume and os.path.exists(checkpoint_path):
     print(f"Loading model from checkpoint: {checkpoint_path}")
     model = LEARN_pl.load_from_checkpoint(checkpoint_path)  # Tải mô hình từ checkpoint
 else:
@@ -80,10 +77,15 @@ dm = CTDataModule(data_dir=path_dir,
                     setting=setting,
                     poission_level=poission_level)
 
+
+# Giả sử model của bạn là một đối tượng của lớp model
+total_params = sum(p.numel() for p in model.parameters())
+print(f'Total number of parameters: {total_params}')
+
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[5],                 # Sử dụng 1 GPU
-    max_epochs=19,
+    devices=[7],                 # Sử dụng 1 GPU
+    max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)

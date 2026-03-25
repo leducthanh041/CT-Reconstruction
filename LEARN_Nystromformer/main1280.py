@@ -46,7 +46,7 @@ input_size = 256
 num_detectors = 512
 poission_level = 0
 
-setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
+setting = "numview_"+str(num_view)+"_inputsize_256_noise_0"
 path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 
 n_iterations = 14
@@ -58,7 +58,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=22-val_psnr=40.6937.ckpt"
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=22-val_psnr=40.6937.ckpt"
 resume = False
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if resume and os.path.exists(checkpoint_path):
@@ -79,7 +79,7 @@ dm = CTDataModule(data_dir=path_dir,
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[1],                 # Sử dụng 1 GPU
+    devices=[4],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,

@@ -43,7 +43,7 @@ class CTDataModule(pl.LightningDataModule):
             self.ct_train = CTSlice_Provider(self.data_dir, setting = self.setting, poission_level = self.poission_level, num_view=self.num_view, input_size=self.input_size, transform=self.transform,num_select=self.num__select)
             print('Leng of CT TRAIN:',len(self.ct_train))
             self.ct_valid = CTSlice_Provider(self.data_dir, valid=True, setting = self.setting, poission_level = self.poission_level, num_view=self.num_view, input_size=self.input_size, transform=self.transform,num_select=self.num__select)
-            print('Leng of CT VALID:',len(self.ct_train))
+            print('Leng of CT VALID:',len(self.ct_valid))
         if stage == "test" or stage is None:
             self.ct_test = CTSlice_Provider(self.data_dir, test=True, setting = self.setting, poission_level = self.poission_level, num_view=self.num_view, input_size=self.input_size, transform=self.transform, num_select=self.num__select)
             print('Leng of CT TEST:',len(self.ct_test))

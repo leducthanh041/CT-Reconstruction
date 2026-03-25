@@ -14,16 +14,23 @@ from torch.utils.data import DataLoader
 
 from CTSlice_Provider import CTSlice_Provider
 from datamodule import CTDataModule
-from models8x8 import GradientFunction
-from models8x8 import LEARN_pl
+from models16x16 import GradientFunction
+from models16x16 import LEARN_pl
 
 
 def load_callbacks(n_iter, n_view, noise):
+    """
+    Create callback list for training.
+
+    Notes:
+    - Logic is kept identical to the original implementation.
+    - Output path naming, monitor metric, and checkpoint behavior are unchanged.
+    """
     callbacks = []
 
     output_path = (
         "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/"
-        "LEARN_LongNet/saved_results_noise_8_with_LongNet/"
+        "LEARN_LongNet/saved_results_noise_16_with_LongNet/"
         "results_LEARN_"
         + str(n_iter)
         + "_iters_bs_1_view_"
@@ -35,7 +42,7 @@ def load_callbacks(n_iter, n_view, noise):
     os.makedirs(output_path, exist_ok=True)
 
     early_stopping = EarlyStopping(
-        monitor="val_psnr",
+        monitor="val_psnr",  # val_ssim, val_psnr, val_rmse
         min_delta=0.00,
         patience=10,
         verbose=True,
@@ -59,20 +66,19 @@ def load_callbacks(n_iter, n_view, noise):
 
 
 def main():
+    """Main training entrypoint. Training logic is unchanged."""
     torch.manual_seed(42)
 
-    # ====== Cấu hình load checkpoint ======
-    use_old_checkpoint = True
-    checkpoint_path = (
-        "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_8_with_LongNet/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=05-val_psnr=39.5273.ckpt"
-    )
-
-    num_view = 64
+    num_view = 32
     input_size = 256
     num_detectors = 512
     poission_level = 0
 
-    setting = "numview_" + str(num_view) + "_inputsize_256_noise_0_transform"
+    setting = (
+        "numview_"
+        + str(num_view)
+        + "_inputsize_256_noise_0_transform"
+    )
     path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 
     n_iterations = 14
@@ -84,21 +90,11 @@ def main():
     seed_everything(42, workers=True)
     tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 
-    # ====== Load model từ checkpoint nếu bật tùy chọn ======
-    if use_old_checkpoint and os.path.exists(checkpoint_path):
-        print(f"Loading model from checkpoint: {checkpoint_path}")
-        model = LEARN_pl.load_from_checkpoint(checkpoint_path)
-    else:
-        if use_old_checkpoint:
-            print(f"Checkpoint not found: {checkpoint_path}")
-            print("Training from scratch instead.")
-        else:
-            print("Training from scratch.")
-        model = LEARN_pl(
-            n_iterations=n_iterations,
-            num_view=num_view,
-            num_detectors=num_detectors,
-        )
+    model = LEARN_pl(
+        n_iterations=n_iterations,
+        num_view=num_view,
+        num_detectors=num_detectors,
+    )
 
     dm = CTDataModule(
         data_dir=path_dir,
@@ -111,9 +107,9 @@ def main():
     )
 
     trainer = pl.Trainer(
-        accelerator="gpu",
-        devices=[6],
-        max_epochs=19,
+        accelerator="gpu",  # Sử dụng GPU
+        devices=[3],        # Sử dụng 1 GPU
+        max_epochs=50,
         logger=tb_logger,
         enable_checkpointing=True,
         callbacks=load_callbacks(n_iter, n_view, noise),

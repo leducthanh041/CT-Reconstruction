@@ -19,7 +19,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(

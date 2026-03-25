@@ -62,7 +62,7 @@ def main():
     torch.manual_seed(42)
 
     # ====== Cấu hình load checkpoint ======
-    use_old_checkpoint = True
+    use_old_checkpoint = False
     checkpoint_path = (
         "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_8_with_LongNet/results_LEARN_14_iters_bs_1_view_64_noise_0_transform/epoch=05-val_psnr=39.5273.ckpt"
     )
@@ -70,7 +70,7 @@ def main():
     num_view = 64
     input_size = 256
     num_detectors = 512
-    poission_level = 0
+    poission_level = 5e5
 
     setting = "numview_" + str(num_view) + "_inputsize_256_noise_0_transform"
     path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
@@ -112,8 +112,8 @@ def main():
 
     trainer = pl.Trainer(
         accelerator="gpu",
-        devices=[6],
-        max_epochs=19,
+        devices=[1],
+        max_epochs=50,
         logger=tb_logger,
         enable_checkpointing=True,
         callbacks=load_callbacks(n_iter, n_view, noise),
