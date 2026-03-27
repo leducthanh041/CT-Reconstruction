@@ -6,12 +6,12 @@ from models import LEARN_pl
 
 NUM_VIEW = 128
 INPUT_SIZE = 256
-POISSION_LEVEL = 1e6
+POISSION_LEVEL = 5e5
 PATH_DIR = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 BATCH_SIZE = 16
 
 CHECKPOINT_PATH = (
-    "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_128_noise_1000000.0_transform/epoch=15-val_psnr=46.2403.ckpt"
+    "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_LongNet/results_LEARN_14_iters_bs_1_view_128_noise_500000.0_transform/epoch=24-val_psnr=45.5138.ckpt"
 )
 
 SETTING = "numview_" + str(NUM_VIEW) + "_inputsize_256_noise_0"
@@ -37,7 +37,7 @@ def build_datamodule():
 def build_trainer():
     return pl.Trainer(
         accelerator="gpu",
-        devices=[4],
+        devices=[3],
         max_epochs=10,
         enable_checkpointing=True,
     )
