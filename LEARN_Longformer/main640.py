@@ -80,7 +80,7 @@ print(f'Total number of parameters: {total_params}')
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[6],                 # Sử dụng 1 GPU
+    devices=[7],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,

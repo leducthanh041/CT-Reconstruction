@@ -34,7 +34,7 @@ class LongNetAttentionBlock(nn.Module):
 
                 
         # Chỉ khởi tạo lớp attention đầu tiên
-        self.longnet_attention = DilatedAttention(dim=self.token_dim, heads=4, dilation_rate=2, segment_size=(16384) // 4, dropout=0.1, qk_norm=True)
+        self.longnet_attention = DilatedAttention(dim=self.token_dim, heads=4, dilation_rate=2, segment_size=1024, dropout=0, qk_norm=True)
 
     def forward(self, x, global_attention_indices=None):
         # x: (batch, 48, 256, 256)
@@ -54,7 +54,7 @@ class LongNetAttentionBlock(nn.Module):
         tokens = tokens.view(batch_size, -1, self.token_dim)        
        
         # Áp dụng lớp attention của LongNet
-        # print(f"Shape before attention: {tokens.shape}")
+        print(f"Shape before attention: {tokens.shape}")
         attention_output = self.longnet_attention(tokens)
         print(f"Shape after attention: {attention_output.shape}")
         

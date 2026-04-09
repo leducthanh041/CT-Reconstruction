@@ -7,6 +7,8 @@ import astra
 import pytorch_lightning as pl
 from pytorch_lightning import LightningDataModule, LightningModule, Trainer
 import odl
+from torchmetrics.image import StructuralSimilarityIndexMeasure 
+from torchmetrics.image import PeakSignalNoiseRatio
 import numpy as np
 from odl.contrib import torch as odl_torch
 from transformers import LongformerSelfAttention, LongformerConfig
@@ -16,7 +18,7 @@ from torchmetrics.functional.image import (
 )
 
 # ----------------------------
-# L?p LongformerAttentionBlock: áp d?ng attention lên output c?a Conv (tokenization, attention, expand l?i)
+# L?p LongformerAttentionBlock: ï¿½p d?ng attention lï¿½n output c?a Conv (tokenization, attention, expand l?i)
 # ----------------------------
 class LongformerAttentionBlock(nn.Module):
     def __init__(self, window_size=2, patch_channels=48, image_size=256, num_layers=12, num_global=50):
@@ -52,25 +54,25 @@ class LongformerAttentionBlock(nn.Module):
 
         # 2) T?o attention_mask
         if attention_mask is None:
-            # Longformer dùng 0 = local, -10000 = no-attn, +10000 = global
-            # ? dây ta không mu?n no-attn, ch? local + global
+            # Longformer dï¿½ng 0 = local, -10000 = no-attn, +10000 = global
+            # ? dï¿½y ta khï¿½ng mu?n no-attn, ch? local + global
             attention_mask = torch.zeros(B, N, dtype=torch.long, device=tokens.device)
 
         # is_index_masked (ch? d? replace softmax=>0)
         is_index_masked = attention_mask != 0  # (B, N)
 
-        # 3) Ch?n evenly 50 global indices trên m?i sequence
-        #    ví d?: linspace t? 0 t?i N-1 thành num_global bu?c
+        # 3) Ch?n evenly 50 global indices trï¿½n m?i sequence
+        #    vï¿½ d?: linspace t? 0 t?i N-1 thï¿½nh num_global bu?c
         global_positions = torch.linspace(0, N-1, steps=self.num_global, device=tokens.device).long()  # (num_global,)
         is_index_global_attn = torch.zeros(B, N, dtype=torch.bool, device=tokens.device)
-        # dánh d?u cho m?i m?u trong batch
+        # dï¿½nh d?u cho m?i m?u trong batch
         is_index_global_attn[:, global_positions] = True
 
         # b?t global attention
         is_global_attn = True
 
         # 4) G?i LongformerSelfAttention
-        #    truy?n thêm is_index_global_attn và is_global_attn
+        #    truy?n thï¿½m is_index_global_attn vï¿½ is_global_attn
         attention_output = self.longformer_attention(
             tokens,
             attention_mask=attention_mask,
@@ -93,7 +95,7 @@ class LongformerAttentionBlock(nn.Module):
 class RegularizationBlock(nn.Module):
     def __init__(self, in_channels=1, out_channels=1, kernel_size=5, patch_channels=48):
         super(RegularizationBlock, self).__init__()
-        padding_value = kernel_size // 2  # V?i kernel_size=5 thì padding = 2
+        padding_value = kernel_size // 2  # V?i kernel_size=5 thï¿½ padding = 2
     
         self.conv1 = nn.Conv2d(in_channels, patch_channels, kernel_size=kernel_size, padding=padding_value)
         nn.init.normal_(self.conv1.weight, mean=0.0, std=0.01)
@@ -101,7 +103,7 @@ class RegularizationBlock(nn.Module):
         '''
         NEW
         '''
-        # L?p Longformer attention block du?c áp d?ng sau Conv1
+        # L?p Longformer attention block du?c ï¿½p d?ng sau Conv1
         self.longnet_attn = LongformerAttentionBlock(window_size=4, patch_channels=patch_channels, image_size=256)
         '''
         NEW
@@ -115,7 +117,7 @@ class RegularizationBlock(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
-        x = self.longnet_attn(x)  # Attention: token hóa -> attention -> expand l?i -> (batch, 48, 256, 256)
+        x = self.longnet_attn(x)  # Attention: token hï¿½a -> attention -> expand l?i -> (batch, 48, 256, 256)
         x = F.relu(self.conv2(x))
         x = self.conv3(x)
         return x
@@ -143,7 +145,8 @@ class LEARN_pl(pl.LightningModule):
         self.final_lr = 1e-5
         self.num_iter = n_iterations
         radon_curr, fbp_curr = self.radon_transform(num_view=num_view, num_detectors=num_detectors)
-        
+        self.ssim = StructuralSimilarityIndexMeasure()
+        self.psnr = PeakSignalNoiseRatio()
         self.forward_module = radon_curr
         self.backward_module = fbp_curr
         
@@ -161,7 +164,7 @@ class LEARN_pl(pl.LightningModule):
         return (batch_min, batch_max)
     
     def forward(self,x_t,y):
-        # x_t là hình ?nh ban d?u (ho?c hình ?nh du?c c?p nh?t)
+        # x_t lï¿½ hï¿½nh ?nh ban d?u (ho?c hï¿½nh ?nh du?c c?p nh?t)
         x_t = x_t
         for i in range(self.num_iter):
             x_t = x_t - self.gradient_list[i](x_t, y, self.forward_module, self.backward_module)
@@ -180,9 +183,9 @@ class LEARN_pl(pl.LightningModule):
 
     def training_step(self, train_batch, batch_idx):
         phantom, fbp_u, sino_noisy = train_batch
-        x_t = fbp_u # Hình ?nh kh?i t?o ban d?u
+        x_t = fbp_u # Hï¿½nh ?nh kh?i t?o ban d?u
         y = sino_noisy
-        initial = torch.rand(y.shape[0],1,256, 256).cuda() # N?u c?n dùng làm kh?i t?o
+        initial = torch.rand(y.shape[0],1,256, 256).cuda() # N?u c?n dï¿½ng lï¿½m kh?i t?o
         x_reconstructed = self.forward(x_t, y)        
         loss = nn.functional.mse_loss(phantom, x_reconstructed)
 

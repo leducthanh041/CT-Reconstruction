@@ -1,18 +1,12 @@
 import pytorch_lightning as pl
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
-from CTSlice_Provider import CTSlice_Provider
 from models2_9M import LEARN_pl
 from datamodule import CTDataModule
-import torch.nn as nn
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-import torch.multiprocessing as mp
 import os
 
-import numpy as np
 from pytorch_lightning import seed_everything
 
 def load_callbacks(n_iter, n_view, noise):

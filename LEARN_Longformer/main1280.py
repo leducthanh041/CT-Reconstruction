@@ -5,12 +5,9 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
 from models import LEARN_pl
 from datamodule import CTDataModule
-import torch.nn as nn
-from torch.utils.data import DataLoader
 import torch.multiprocessing as mp
 import os
 
-import numpy as np
 from pytorch_lightning import seed_everything
 
 def load_callbacks(n_iter, n_view, noise):

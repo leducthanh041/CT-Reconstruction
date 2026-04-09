@@ -4,8 +4,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
 from models2_9M import LEARN_pl
-from datamodule import CTDataModule
-from torch.utils.data import DataLoader
+from datamodule_dl import CTDataModule
 import os
 
 from pytorch_lightning import seed_everything
@@ -14,7 +13,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_with_Nystromformer/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -42,7 +41,7 @@ num_detectors = 512
 poission_level = 1e4
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0_transform"
-path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
+path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split_dl/"
 
 n_iterations = 14
 batch_size = 1
@@ -53,7 +52,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_8_with_Nystromformer/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=22-val_psnr=40.6937.ckpt"
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Nystromformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_128_noise_0_transform/epoch=14-val_psnr=45.1736.ckpt"
 resume=False
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if resume and os.path.exists(checkpoint_path):
@@ -74,7 +73,7 @@ dm = CTDataModule(data_dir=path_dir,
 
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[6],                 # Sử dụng 1 GPU
+    devices=[5],                 # Sử dụng 1 GPU
     max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,
