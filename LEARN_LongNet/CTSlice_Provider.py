@@ -100,7 +100,7 @@ class CTSlice_Provider(Dataset):
 
   def __getitem__(self, index):  
     slice_path=self.slices_path[index]
-    dcm=pydicom.read_file(slice_path)
+    dcm = pydicom.dcmread(slice_path)
     dcm.image=dcm.pixel_array*dcm.RescaleSlope+dcm.RescaleIntercept
     data_slice=dcm.image
     data_slice=np.array(data_slice).astype(float)

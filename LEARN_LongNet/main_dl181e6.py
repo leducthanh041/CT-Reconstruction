@@ -15,7 +15,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -45,7 +45,7 @@ poission_level = 1e6
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0"
 path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split_dl/"
 
-n_iterations = 30
+n_iterations = 14
 batch_size = 1
 
 n_iter, n_view, noise = n_iterations, num_view, str(poission_level)
@@ -54,8 +54,8 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_18_noise_1000000.0_transform/epoch=25-val_psnr=-28.5173.ckpt"
-resume=True
+checkpoint_path = "/data/uittogether/LuuTru/Thanhld/Sparse-view-CT-reconstruction-main/CT_Reconstruction_LEARN_paper/saved_results_noise_2_with_LongformerAttention/results_LEARN_14_iters_bs_1_view_32_noise_0_transform/epoch=32-val_psnr=38.2781.ckpt"
+resume = False
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if resume and os.path.exists(checkpoint_path):
     print(f"Loading model from checkpoint: {checkpoint_path}")
@@ -63,7 +63,6 @@ if resume and os.path.exists(checkpoint_path):
 else:
     model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
 
-# model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
 
 dm = CTDataModule(data_dir=path_dir, 
                     batch_size=batch_size, 
@@ -73,10 +72,15 @@ dm = CTDataModule(data_dir=path_dir,
                     setting=setting,
                     poission_level=poission_level)
 
+
+# Giả sử model của bạn là một đối tượng của lớp model
+total_params = sum(p.numel() for p in model.parameters())
+print(f'Total number of parameters: {total_params}')
+
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[2],                 # Sử dụng 1 GPU
-    max_epochs=25,
+    devices=[7],                 # Sử dụng 1 GPU
+    max_epochs=50,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)

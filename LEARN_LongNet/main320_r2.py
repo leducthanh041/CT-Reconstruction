@@ -1,21 +1,13 @@
 import os
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pytorch_lightning as pl
-import torch
-import torch.multiprocessing as mp
-import torch.nn as nn
-from pytorch_lightning import LightningDataModule, LightningModule, Trainer
+import pytorch_lightning as pl 
+from pytorch_lightning import Trainer
 from pytorch_lightning import seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torch.utils.data import DataLoader
-
-from CTSlice_Provider import CTSlice_Provider
+import torch
 from datamodule import CTDataModule
-from models16x16 import GradientFunction
-from models16x16 import LEARN_pl
+from models_r2 import LEARN_pl
 
 
 def load_callbacks(n_iter, n_view, noise):
@@ -30,7 +22,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     output_path = (
         "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/"
-        "LEARN_LongNet/saved_results_noise_16_with_LongNet/"
+        "LEARN_LongNet/saved_results_noise_2_with_r2/"
         "results_LEARN_"
         + str(n_iter)
         + "_iters_bs_1_view_"

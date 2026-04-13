@@ -5,17 +5,15 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 import torch
 from models import LEARN_pl
 from datamodule_dl import CTDataModule
-import torch.nn as nn
 import os
 
-import numpy as np
 from pytorch_lightning import seed_everything
 
 def load_callbacks(n_iter, n_view, noise):
 
     Mycallbacks = []
     # Make output path
-    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
+    output_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl/results_LEARN_" + str(n_iter) + "_iters_bs_1_view_" + str(n_view) + "_noise_" + str(noise) + "_transform/"
     os.makedirs(output_path, exist_ok=True)
 
     early_stop_callback = EarlyStopping(
@@ -40,12 +38,12 @@ torch.manual_seed(42)
 num_view = 18
 input_size = 256
 num_detectors = 512
-poission_level = 1e6
+poission_level = 5e5
 
 setting = "numview_"+str(num_view)+"_inputsize_256_noise_0"
 path_dir = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split_dl/"
 
-n_iterations = 30
+n_iterations = 14
 batch_size = 1
 
 n_iter, n_view, noise = n_iterations, num_view, str(poission_level)
@@ -54,7 +52,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN/saved_results_noise_2_dl/results_LEARN_30_iters_bs_1_view_18_noise_1000000.0_transform/epoch=25-val_psnr=-28.5173.ckpt"
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_18_noise_500000.0_transform/epoch=01-val_psnr=-27.8362.ckpt"
 resume=True
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if resume and os.path.exists(checkpoint_path):
@@ -73,10 +71,15 @@ dm = CTDataModule(data_dir=path_dir,
                     setting=setting,
                     poission_level=poission_level)
 
+
+# Giả sử model của bạn là một đối tượng của lớp model
+total_params = sum(p.numel() for p in model.parameters())
+print(f'Total number of parameters: {total_params}')
+
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
-    devices=[2],                 # Sử dụng 1 GPU
-    max_epochs=25,
+    devices=[3],                 # Sử dụng 1 GPU
+    max_epochs=48,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)
