@@ -52,7 +52,7 @@ print("n_iter, n_view, noise", n_iter, n_view, noise)
 seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 # Đường dẫn tới checkpoint
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_18_noise_500000.0_transform/epoch=01-val_psnr=-27.8362.ckpt"
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_dl/results_LEARN_14_iters_bs_1_view_18_noise_500000.0_transform/epoch=38-val_psnr=29.1161.ckpt"
 resume=True
 # Nếu checkpoint tồn tại, hãy tải mô hình từ checkpoint
 if resume and os.path.exists(checkpoint_path):
@@ -79,7 +79,7 @@ print(f'Total number of parameters: {total_params}')
 trainer = pl.Trainer(
     accelerator='gpu',         # Sử dụng GPU
     devices=[3],                 # Sử dụng 1 GPU
-    max_epochs=48,
+    max_epochs=9,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)

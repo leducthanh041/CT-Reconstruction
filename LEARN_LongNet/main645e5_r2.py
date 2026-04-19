@@ -82,11 +82,16 @@ def main():
     seed_everything(42, workers=True)
     tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 
-    model = LEARN_pl(
-        n_iterations=n_iterations,
-        num_view=num_view,
-        num_detectors=num_detectors,
-    )
+    checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r2/results_LEARN_14_iters_bs_1_view_64_noise_500000.0_transform/epoch=05-val_psnr=23.6285.ckpt"
+    resume=True
+
+
+    if resume and os.path.exists(checkpoint_path):
+        print(f"Loading model from checkpoint: {checkpoint_path}")
+        model = LEARN_pl.load_from_checkpoint(checkpoint_path)
+        
+    else:
+        model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
 
     dm = CTDataModule(
         data_dir=path_dir,
@@ -100,8 +105,8 @@ def main():
 
     trainer = pl.Trainer(
         accelerator="gpu",  # Sử dụng GPU
-        devices=[5],        # Sử dụng 1 GPU
-        max_epochs=50,
+        devices=[4],        # Sử dụng 1 GPU
+        max_epochs=44,
         logger=tb_logger,
         enable_checkpointing=True,
         callbacks=load_callbacks(n_iter, n_view, noise),

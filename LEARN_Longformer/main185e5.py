@@ -54,8 +54,8 @@ seed_everything(42, workers=True)
 tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 
 
-checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_128_noise_0_transform/epoch=13-val_psnr=41.1630.ckpt"
-resume=False
+checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_Longformer/saved_results_noise_2_with_Longformer/results_LEARN_14_iters_bs_1_view_18_noise_500000.0_transform/epoch=42-val_psnr=31.9229.ckpt"
+resume=True
 
 
 if resume and os.path.exists(checkpoint_path):
@@ -82,7 +82,7 @@ print(f'Total number of parameters: {total_params}')
 trainer = pl.Trainer(
     accelerator='gpu',      
     devices=[6],                
-    max_epochs=50,
+    max_epochs=8,
     logger=tb_logger,
     enable_checkpointing=True,
     callbacks=load_callbacks(n_iter, n_view, noise)

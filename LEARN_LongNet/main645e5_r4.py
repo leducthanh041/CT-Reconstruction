@@ -7,7 +7,7 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torch.utils.data import DataLoader
 import torch
 from datamodule import CTDataModule
-from models_r2 import LEARN_pl
+from models_r4 import LEARN_pl
 
 
 def load_callbacks(n_iter, n_view, noise):
@@ -22,7 +22,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     output_path = (
         "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/"
-        "LEARN_LongNet/saved_results_noise_2_with_r2/"
+        "LEARN_LongNet/saved_results_noise_2_with_r4/"
         "results_LEARN_"
         + str(n_iter)
         + "_iters_bs_1_view_"
@@ -61,10 +61,10 @@ def main():
     """Main training entrypoint. Training logic is unchanged."""
     torch.manual_seed(42)
 
-    num_view = 32
+    num_view = 64
     input_size = 256
     num_detectors = 512
-    poission_level = 1e6
+    poission_level = 5e5
 
     setting = (
         "numview_"
@@ -82,16 +82,11 @@ def main():
     seed_everything(42, workers=True)
     tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 
-    checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r2/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=06-val_psnr=14.1088.ckpt"
-    resume=True
-
-
-    if resume and os.path.exists(checkpoint_path):
-        print(f"Loading model from checkpoint: {checkpoint_path}")
-        model = LEARN_pl.load_from_checkpoint(checkpoint_path)
-        
-    else:
-        model = LEARN_pl(n_iterations=n_iterations, num_view=num_view, num_detectors=num_detectors)
+    model = LEARN_pl(
+        n_iterations=n_iterations,
+        num_view=num_view,
+        num_detectors=num_detectors,
+    )
 
     dm = CTDataModule(
         data_dir=path_dir,
@@ -105,8 +100,8 @@ def main():
 
     trainer = pl.Trainer(
         accelerator="gpu",  # Sử dụng GPU
-        devices=[4],        # Sử dụng 1 GPU
-        max_epochs=47,
+        devices=[5],        # Sử dụng 1 GPU
+        max_epochs=50,
         logger=tb_logger,
         enable_checkpointing=True,
         callbacks=load_callbacks(n_iter, n_view, noise),

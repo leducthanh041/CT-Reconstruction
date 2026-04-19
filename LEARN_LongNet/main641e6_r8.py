@@ -7,7 +7,7 @@ from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 from torch.utils.data import DataLoader
 import torch
 from datamodule import CTDataModule
-from models_r2 import LEARN_pl
+from models_r8 import LEARN_pl
 
 
 def load_callbacks(n_iter, n_view, noise):
@@ -22,7 +22,7 @@ def load_callbacks(n_iter, n_view, noise):
 
     output_path = (
         "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/"
-        "LEARN_LongNet/saved_results_noise_2_with_r2/"
+        "LEARN_LongNet/saved_results_noise_2_with_r8/"
         "results_LEARN_"
         + str(n_iter)
         + "_iters_bs_1_view_"
@@ -61,7 +61,7 @@ def main():
     """Main training entrypoint. Training logic is unchanged."""
     torch.manual_seed(42)
 
-    num_view = 32
+    num_view = 64
     input_size = 256
     num_detectors = 512
     poission_level = 1e6
@@ -82,7 +82,7 @@ def main():
     seed_everything(42, workers=True)
     tb_logger = pl.loggers.TensorBoardLogger("LEARN_Training_all")
 
-    checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r2/results_LEARN_14_iters_bs_1_view_32_noise_1000000.0_transform/epoch=06-val_psnr=14.1088.ckpt"
+    checkpoint_path = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r8/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=07-val_psnr=30.9973.ckpt"
     resume=True
 
 
@@ -105,8 +105,8 @@ def main():
 
     trainer = pl.Trainer(
         accelerator="gpu",  # Sử dụng GPU
-        devices=[4],        # Sử dụng 1 GPU
-        max_epochs=47,
+        devices=[6],        # Sử dụng 1 GPU
+        max_epochs=42,
         logger=tb_logger,
         enable_checkpointing=True,
         callbacks=load_callbacks(n_iter, n_view, noise),

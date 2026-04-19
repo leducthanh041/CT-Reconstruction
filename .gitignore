@@ -17,3 +17,5 @@ saved_results_noise_4_with_Longformer
 saved_results_noise_2_with_Longformer
 dilated-attention-pytorch
 saved_results_noise_2_with_r2
+saved_results_noise_2_with_r4
+saved_results_noise_2_with_r8

@@ -1,17 +1,17 @@
 import pytorch_lightning as pl
 
 from datamodule import CTDataModule
-from models_r2 import LEARN_pl
+from models_r8 import LEARN_pl
 
 
 NUM_VIEW = 64
 INPUT_SIZE = 256
-POISSION_LEVEL = 5e5
+POISSION_LEVEL = 1e6
 PATH_DIR = "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/split/"
 BATCH_SIZE = 16
 
 CHECKPOINT_PATH = (
-    "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r2/results_LEARN_14_iters_bs_1_view_64_noise_500000.0_transform/epoch=05-val_psnr=23.6285.ckpt"
+    "/mmlab_students/storageStudents/nguyenvd/Thanhld/CT-Reconstruction/LEARN_LongNet/saved_results_noise_2_with_r8/results_LEARN_14_iters_bs_1_view_64_noise_1000000.0_transform/epoch=00-val_psnr=31.0005.ckpt"
 )
 
 SETTING = "numview_" + str(NUM_VIEW) + "_inputsize_256_noise_0_transform"
@@ -37,7 +37,7 @@ def build_datamodule():
 def build_trainer():
     return pl.Trainer(
         accelerator="gpu",
-        devices=[1],
+        devices=[2],
         max_epochs=10,
         enable_checkpointing=True,
     )
